@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Pickup - JERK Tracker X</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #ed7734 0%, #de5d20 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo h1 {
+      color: #1a202c;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .logo-subtitle {
+      color: #ed7734;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .order-info {
+      background: #f7fafc;
+      border-left: 4px solid #ed7734;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+
+    .order-label {
+      color: #718096;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .order-number {
+      color: #1a202c;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .order-status {
+      display: inline-block;
+      background: #48bb78;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      color: #4a5568;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #ed7734;
+      box-shadow: 0 0 0 3px rgba(237, 119, 52, 0.1);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: #ed7734;
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover {
+      background: #de5d20;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(237, 119, 52, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-screen.active {
+      display: block;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #48bb78;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: scaleIn 0.3s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+
+    .success-icon svg {
+      width: 48px;
+      height: 48px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+    }
+
+    .success-title {
+      color: #1a202c;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .success-message {
+      color: #718096;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .error-message {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .error-message.active {
+      display: block;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .spinner {
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #ed7734;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>JERK Tracker X</h1>
+      <div class="logo-subtitle">Driver Pickup</div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading">
+      <div class="spinner"></div>
+      <p style="color: #718096;">Loading order details...</p>
+    </div>
+
+    <!-- Pickup Form -->
+    <div id="pickupForm" style="display: none;">
+      <div class="order-info">
+        <div class="order-label">Order Number</div>
+        <div class="order-number" id="orderNumber">-</div>
+        <div class="order-status" id="orderStatus">Ready for Pickup</div>
+      </div>
+
+      <form id="driverForm">
+        <div class="form-group">
+          <label for="driverName">Driver Name *</label>
+          <input 
+            type="text" 
+            id="driverName" 
+            placeholder="Enter your full name"
+            required 
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="deliveryCompany">Delivery Company *</label>
+          <select id="deliveryCompany" required>
+            <option value="">Select your company</option>
+            <option value="DoorDash">DoorDash</option>
+            <option value="Uber Eats">Uber Eats</option>
+            <option value="GrubHub">GrubHub</option>
+            <option value="Postmates">Postmates</option>
+            <option value="Instacart">Instacart</option>
+            <option value="Seamless">Seamless</option>
+            <option value="Independent">Independent Driver</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Confirm Pickup
+        </button>
+
+        <div class="error-message" id="errorMessage"></div>
+      </form>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="successScreen" class="success-screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="success-title">Pickup Confirmed!</div>
+      <div class="success-message">
+        The restaurant has been notified.<br>
+        Thank you for confirming the pickup.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration - UPDATE THIS WITH YOUR GITHUB PAGES URL
+    // After deploying to GitHub Pages, change this to your actual API endpoint
+    // Example: 'https://your-api-domain.com' or keep as GitHub Pages for static demo
+    const API_BASE_URL = 'https://YOUR-USERNAME.github.io/jerk-tracker-api'; // TODO: Update this!
+    
+    // Get order ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order');
+
+    // DOM elements
+    const loadingState = document.getElementById('loadingState');
+    const pickupForm = document.getElementById('pickupForm');
+    const successScreen = document.getElementById('successScreen');
+    const driverForm = document.getElementById('driverForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Load order details
+    async function loadOrder() {
+      if (!orderId) {
+        showError('Invalid order ID. Please scan the QR code again.');
+        return;
+      }
+
+      try {
+        // Fetch order details from API
+        const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
+        
+        if (!response.ok) {
+          throw new Error('Order not found');
+        }
+
+        const order = await response.json();
+        
+        // Display order info
+        document.getElementById('orderNumber').textContent = order.orderNumber || orderId;
+        
+        // Show the form
+        loadingState.style.display = 'none';
+        pickupForm.style.display = 'block';
+        
+      } catch (error) {
+        console.error('Error loading order:', error);
+        showError('Unable to load order details. Please try again or contact the restaurant.');
+        loadingState.style.display = 'none';
+        pickupForm.style.display = 'block';
+        document.getElementById('orderNumber').textContent = orderId;
+      }
+    }
+
+    // Handle form submission
+    driverForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const driverName = document.getElementById('driverName').value.trim();
+      const deliveryCompany = document.getElementById('deliveryCompany').value;
+
+      if (!driverName || !deliveryCompany) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      // Disable submit button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Confirming...';
+      errorMessage.classList.remove('active');
+
+      try {
+        // Submit pickup confirmation
+        const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/pickup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            driverName,
+            deliveryCompany,
+            pickedUpAt: new Date().toISOString()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to confirm pickup');
+        }
+
+        // Show success screen
+        pickupForm.style.display = 'none';
+        successScreen.classList.add('active');
+
+      } catch (error) {
+        console.error('Error confirming pickup:', error);
+        showError('Unable to confirm pickup. Please try again or contact the restaurant.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Confirm Pickup';
+      }
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('active');
+    }
+
+    // Load order on page load
+    loadOrder();
+  </script>
+</body>
+</html>
